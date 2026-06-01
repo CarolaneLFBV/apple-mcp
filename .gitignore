@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+wheels/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+**/.venv/
+
+# uv
+# (uv.lock is committed on purpose for reproducible installs)
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
