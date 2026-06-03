@@ -7,6 +7,7 @@ from apple_mail_mcp.server import (
     HANDLE,
     RECORD,
     esc,
+    message_url,
     parse_messages,
     split_handle,
     _format_list,
@@ -76,3 +77,16 @@ def test_format_list_renders_handle_and_marker():
     assert "Subj" in out
     assert "iCloud|||INBOX|||7" in out
     assert "●" in out  # unread marker
+
+
+def test_message_url_empty():
+    assert message_url("") == ""
+    assert message_url("   ") == ""
+
+
+def test_message_url_builds_clickable_scheme():
+    assert message_url("abc123@mail.example.com") == "message://%3Cabc123@mail.example.com%3E"
+
+
+def test_message_url_strips_existing_brackets():
+    assert message_url("<abc@x.com>") == "message://%3Cabc@x.com%3E"

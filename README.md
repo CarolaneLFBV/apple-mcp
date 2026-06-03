@@ -9,16 +9,18 @@ Each server is a standalone Python package that talks to a native macOS app thro
 | Server | Status | What it does |
 |--------|--------|--------------|
 | [`apple-mail`](./apple-mail) | ✅ Available | Read, search and organize Mail.app (no send) |
-| `apple-calendar` | 🔜 Planned | Read and manage Calendar.app events |
+| [`apple-calendar`](./apple-calendar) | ✅ Available | Read, create, update and delete Calendar.app events |
 | `apple-health` | 🔜 Planned | Read Apple Health data |
+
+> `apple-mail` and `apple-calendar` compose: `read_message` exposes a `message://` URL you can drop into an event's `url` so a calendar entry links straight back to the email.
 
 Each server lives in its own directory and is installed independently — pick only the ones you want.
 
 ## Quick start
 
-See each server's README for installation and configuration. For Apple Mail:
+See each server's README for installation and configuration:
 
-➡️ **[apple-mail/README.md](./apple-mail/README.md)**
+➡️ **[apple-mail/README.md](./apple-mail/README.md)** · **[apple-calendar/README.md](./apple-calendar/README.md)**
 
 ## Why separate servers?
 

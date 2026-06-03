@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import subprocess
 from typing import Optional
+from urllib.parse import quote
 
 from mcp.server.fastmcp import FastMCP
 
@@ -61,6 +62,19 @@ def run_applescript(script: str) -> str:
 def esc(value: str) -> str:
     """Escape a string for insertion into an AppleScript string literal."""
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def message_url(raw_message_id: str) -> str:
+    """Build a clickable `message://` URL from a raw RFC Message-ID.
+
+    Opening this URL (e.g. from a calendar event's URL field) re-opens the
+    message in Mail.app. Returns "" if no message id is available.
+    """
+    mid = raw_message_id.strip()
+    if not mid:
+        return ""
+    mid = mid.lstrip("<").rstrip(">")  # normalize if already bracketed
+    return f"message://%3C{quote(mid, safe='@.-_+')}%3E"
 
 
 def parse_messages(raw: str) -> list[dict]:
@@ -262,18 +276,22 @@ def read_message(handle: str) -> str:
         try
             set theReplyTo to reply to of theMessage
         end try
+        set theMsgId to ""
+        try
+            set theMsgId to message id of theMessage
+        end try
         set outText to theSubject & "{FIELD}" & theSender & "{FIELD}"
         set outText to outText & theDate & "{FIELD}" & theReplyTo & "{FIELD}"
-        set outText to outText & theBody
+        set outText to outText & theMsgId & "{FIELD}" & theBody
         return outText
     end tell
     '''
     raw = run_applescript(script)
     parts = raw.split(FIELD)
-    if len(parts) < 5:
+    if len(parts) < 6:
         return "Message not found or unreadable."
-    subject, sender, date_str, reply_to = parts[0], parts[1], parts[2], parts[3]
-    body = FIELD.join(parts[4:])
+    subject, sender, date_str, reply_to, raw_msg_id = parts[:5]
+    body = FIELD.join(parts[5:])
     header = [
         f"Subject  : {subject}",
         f"From     : {sender}",
@@ -281,6 +299,10 @@ def read_message(handle: str) -> str:
     ]
     if reply_to:
         header.append(f"Reply-To : {reply_to}")
+    msg_url = message_url(raw_msg_id)
+    if msg_url:
+        # Paste this into a calendar event's URL to link back to the mail.
+        header.append(f"Message-URL : {msg_url}")
     return "\n".join(header) + "\n\n" + body
 
 
